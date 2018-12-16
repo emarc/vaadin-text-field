@@ -23,6 +23,13 @@ This program is available under Apache License Version 2.0, available at https:/
         content: "+";
       }
 
+      [part="decrease-button"], [part="increase-button"] {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none; 
+        user-select: none;
+      }
+
       /* Hide the native arrow icons */
       [part="value"]::-webkit-outer-spin-button,
       [part="value"]::-webkit-inner-spin-button {
@@ -151,7 +158,7 @@ This program is available under Apache License Version 2.0, available at https:/
         __add(sign) {
           const incr = sign * (this.step || 1);
           // Behave like native number input adjusting to the next exact multiple of step.
-          this.value = (incr + (incr * Math.floor((parseFloat(this.value || 0) / incr).toFixed(1)))).toFixed(this.__decimals);
+          this.value = this.focusElement.value = (incr + (incr * Math.floor((parseFloat(this.value || 0) / incr).toFixed(1)))).toFixed(this.__decimals);
           this.dispatchEvent(new CustomEvent('change', {bubbles: true}));
           this.focusElement.focus();
         }
@@ -172,9 +179,11 @@ This program is available under Apache License Version 2.0, available at https:/
         }
 
         _valueChanged(newVal, oldVal) {
-          // native input does not accept certain values, and also converts
-          // from number to string, so we need synchronize value
-          this.value = this.focusElement.value;
+          if (!isNaN(newVal) && !isNaN(parseFloat(newVal).toFixed(this.__decimals))) {
+            this.value = parseFloat(newVal).toFixed(this.__decimals).toString();
+          } else {
+            this.value = this.focusElement.value = '';
+          }
           super._valueChanged(this.value, oldVal);
         }
 
